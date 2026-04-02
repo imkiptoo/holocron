@@ -1,0 +1,6 @@
+/target
+**/*.rs.bk
+holocron.toml
+.env
+.DS_Store
+/.idea

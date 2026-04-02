@@ -1,0 +1,50 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/holocron-core",
+    "crates/holocron-cli",
+    "crates/holocron-server",
+    "crates/holocron-grpc",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Isaac Kiptoo"]
+
+[workspace.dependencies]
+tokio = { version = "1", features = ["full"] }
+# reqwest 0.13.2+ folded webpki-roots into the `rustls` feature (which now
+# bundles the aws-lc-rs provider + roots).
+reqwest = { version = "0.13", default-features = false, features = ["json", "stream", "http2", "rustls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "1"
+# sqlx stays on 0.8: pgvector (our vector-store binding) has no sqlx-0.9 support
+# yet, and sqlx 0.9 also requires rustc ≥ 1.94 (we're fine there now) plus a
+# rewrite of every dynamic query for its new anti-injection guard.
+sqlx = { version = "0.8", default-features = false, features = [
+    "postgres", "runtime-tokio", "tls-rustls",
+    "uuid", "chrono", "bigdecimal", "json",
+] }
+pgvector = { version = "0.4.2", features = ["sqlx"] }
+sqlparser = { version = "0.52", features = ["visitor"] }
+async-trait = "0.1"
+futures = "0.3"
+async-stream = "0.3"
+anyhow = "1"
+thiserror = "2"
+clap = { version = "4", features = ["derive", "env"] }
+axum = "0.8"
+tower = { version = "0.5", features = ["limit", "load-shed", "timeout", "util"] }
+tower-http = { version = "0.7", features = ["cors", "trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "time"] }
+tonic = "0.14"
+tonic-prost = "0.14"
+tonic-prost-build = "0.14"
+prost = "0.14"
+comfy-table = "7"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
