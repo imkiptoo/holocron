@@ -1,0 +1,51 @@
+# holocron configuration. Copy to `holocron.toml` and fill in your values.
+# The engine looks for `./holocron.toml` (override with the HOLOCRON_CONFIG env var).
+
+[gemini]
+api_key    = "your-gemini-api-key"
+chat_model = "gemini-2.5-flash"       # optional, this is the default
+embed_model = "gemini-embedding-001"  # 768-dim (via outputDimensionality)
+embed_dims = 768                      # must match embed_model + the pgvector column
+max_concurrency = 8                   # cap concurrent outbound Gemini calls (rate-limit governor)
+max_retries = 3                       # retries on 429/5xx/timeout with exponential backoff
+
+[database]
+# The warehouse queried by generated SQL.
+url = "postgres://postgres:postgres@localhost:5432/holocron_demo"
+# Where training embeddings live (needs pgvector). Defaults to `url` if omitted.
+# vector_url = "postgres://postgres:postgres@localhost:5432/holocron_demo"
+max_connections = 10                  # pool ceiling per database
+acquire_timeout_secs = 30             # how long a query waits for a pooled connection
+
+[retrieval]
+top_k_ddl  = 5
+top_k_docs = 5
+top_k_sql  = 5
+
+[safety]
+# Generated SQL is untrusted. It's parsed and checked before it ever runs:
+# a single read-only SELECT, no writes/DDL (incl. writable CTEs), no system
+# schemas, no file/dblink/server-control functions. Queries also execute inside
+# a READ ONLY transaction with a statement_timeout. The real boundary, though,
+# is a least-privilege DB role — see demo/readonly_role.sql.
+read_only            = true
+validate_sql         = true           # AST validation gate (recommended on)
+allow_system_schemas = false          # allow information_schema / pg_catalog refs
+statement_timeout_secs = 30           # per-query cap (0 = no limit)
+max_rows             = 10000          # cap rows returned by run_sql (0 = unlimited)
+
+[cache]
+# Verbatim SQL cache: reuse a past query's SQL only when the exact question
+# repeats (normalized case/spacing) — matching is exact, not by similarity, so
+# "top 10 …" and "bottom 10 …" never collide. Cleared when DDL is trained.
+enabled = true
+ttl_secs = 3600                       # cache entry lifetime (0 = no expiry)
+
+[server]
+bind_addr = "127.0.0.1:8080"
+request_timeout_secs = 120            # per-request timeout
+max_concurrent_requests = 64          # load-shed (503) beyond this many in-flight
+
+[logging]
+level  = "info"                       # debug | info | warn | error (override: HOLOCRON_LOG / RUST_LOG)
+format = "console"                    # console (pretty, dev) | json (structured, prod)
