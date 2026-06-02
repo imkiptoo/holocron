@@ -1,0 +1,20 @@
+[package]
+name = "holocron-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Command-line interface for the holocron text-to-SQL engine"
+
+[[bin]]
+name = "holocron"
+path = "src/main.rs"
+
+[dependencies]
+holocron-core = { path = "../holocron-core" }
+tokio = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+serde_json = { workspace = true }
+comfy-table = { workspace = true }
+tracing = { workspace = true }
