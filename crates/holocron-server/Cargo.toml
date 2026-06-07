@@ -1,0 +1,24 @@
+[package]
+name = "holocron-server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "HTTP API server for the holocron text-to-SQL engine"
+
+[[bin]]
+name = "holocron-server"
+path = "src/main.rs"
+
+[dependencies]
+holocron-core = { path = "../holocron-core" }
+tokio = { workspace = true }
+axum = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+futures = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
