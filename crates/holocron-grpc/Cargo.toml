@@ -1,0 +1,28 @@
+[package]
+name = "holocron-grpc"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "gRPC API server for the holocron text-to-SQL engine"
+
+[[bin]]
+name = "holocron-grpc"
+path = "src/main.rs"
+
+[dependencies]
+holocron-core = { path = "../holocron-core" }
+tokio = { workspace = true }
+tonic = { workspace = true }
+# tonic 0.14 moved prost message support into a separate runtime crate.
+tonic-prost = { workspace = true }
+prost = { workspace = true }
+futures = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[build-dependencies]
+# tonic 0.14 split the prost code generator out of tonic-build.
+tonic-prost-build = { workspace = true }

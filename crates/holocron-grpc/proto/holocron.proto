@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+// holocron text-to-SQL RAG engine, gRPC surface. Mirrors the HTTP API in
+// `holocron-server`. `GenerateSql` is the drop-in for the DairyBook Go API's
+// `Generator` (previously the Python Vanna sidecar): it takes a question plus
+// role-scoped schema context / allowed views / conversation history and returns
+// candidate SQL. Validation + farm-scoped execution stay in the Go caller.
+package holocron.v1;
+
+// Go output package (ignored by the Rust/tonic build; used by protoc-gen-go for
+// the DairyBook API client in `api/pkg/ai/holocronpb`).
+option go_package = "dairybook/pkg/ai/holocronpb;holocronpb";
+
+service Holocron {
+  // Turn a natural-language question into candidate SQL (RAG generation).
+  rpc GenerateSql(GenerateSqlRequest) returns (GenerateSqlResponse);
+  // Same, but stream the model's output as it is produced.
+  rpc GenerateSqlStream(GenerateSqlRequest) returns (stream SqlDelta);
+  // Full pipeline: generate SQL, optionally run it and suggest follow-ups.
+  rpc Ask(AskRequest) returns (AskResponse);
+  // Execute SQL directly against the warehouse (read-only unless configured).
+  rpc RunSql(RunSqlRequest) returns (RunSqlResponse);
+  // Add training material (DDL / documentation / question-SQL pair).
+  rpc Train(TrainRequest) returns (TrainResponse);
+  // List stored training material.
+  rpc ListTrainingData(ListTrainingDataRequest) returns (ListTrainingDataResponse);
+  // Remove one training row by id.
+  rpc RemoveTrainingData(RemoveTrainingDataRequest) returns (RemoveTrainingDataResponse);
+  // Liveness probe.
+  rpc Health(HealthRequest) returns (HealthResponse);
+}
+
+// One prior conversation message, for multi-turn follow-ups.
+message Turn {
+  string role = 1;     // "user" | "assistant"
+  string content = 2;
+}
+
+message GenerateSqlRequest {
+  string question = 1;
+  string schema_context = 2;          // optional role-scoped view DDL (no data)
+  repeated string allowed_views = 3;  // advisory; the caller re-validates
+  repeated Turn history = 4;          // recent prior turns
+}
+message GenerateSqlResponse {
+  string sql = 1;
+}
+
+// One incremental chunk of streamed generation.
+message SqlDelta {
+  string text = 1;
+}
+
+message AskRequest {
+  string question = 1;
+  bool run = 2;
+  bool followups = 3;
+  bool answer = 4;                // phrase the result into a written answer
+}
+message AskResponse {
+  string sql = 1;
+  string result_json = 2;         // QueryResult encoded as JSON ("" if not run)
+  string error = 3;               // execution error ("" if none)
+  repeated string followups = 4;
+  string answer = 5;              // natural-language answer over the rows ("" if none)
+}
+
+message RunSqlRequest {
+  string sql = 1;
+}
+message RunSqlResponse {
+  string result_json = 1;         // QueryResult encoded as JSON
+}
+
+message SqlTraining {
+  string sql = 1;
+  string question = 2;            // optional; synthesized when empty
+}
+message TrainRequest {
+  oneof item {
+    string ddl = 1;
+    string documentation = 2;
+    SqlTraining sql = 3;
+  }
+}
+message TrainResponse {
+  string id = 1;
+}
+
+message ListTrainingDataRequest {}
+message TrainingRow {
+  string id = 1;
+  string kind = 2;
+  string question = 3;
+  string content = 4;
+}
+message ListTrainingDataResponse {
+  repeated TrainingRow rows = 1;
+}
+
+message RemoveTrainingDataRequest {
+  string id = 1;
+}
+message RemoveTrainingDataResponse {
+  bool removed = 1;
+}
+
+message HealthRequest {}
+message HealthResponse {
+  string status = 1;
+}
