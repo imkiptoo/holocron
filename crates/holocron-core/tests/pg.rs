@@ -284,7 +284,7 @@ async fn verbatim_cache_exact_match_upsert_ttl_and_clear() {
     let hit = store.cache_lookup("top 10 products by revenue", 0).await.unwrap();
     assert_eq!(hit.as_deref(), Some("SELECT ... ORDER BY rev DESC"));
 
-    // The near-identical opposite question is a MISS — no similarity collision.
+    // The near-identical opposite question is a MISS - no similarity collision.
     let miss = store.cache_lookup("bottom 10 products by revenue", 0).await.unwrap();
     assert!(miss.is_none(), "opposite question must not hit the cache");
 
@@ -356,7 +356,7 @@ async fn read_only_transaction_blocks_writes_at_db_level() {
     sqlx::query("INSERT INTO holo_probe VALUES (1)").execute(&pool).await.unwrap();
 
     // A read-only runner (validation NOT involved here) must have Postgres
-    // itself reject a write — the belt-and-braces below the AST gate.
+    // itself reject a write - the belt-and-braces below the AST gate.
     let runner = PgSqlRunner::from_pool(
         holocron_core::providers::postgres::connect_pool(&cfg.database_url, 5, std::time::Duration::from_secs(30))
             .await

@@ -1,4 +1,4 @@
-//! `holocron-grpc` — a gRPC surface over the holocron engine, alongside the HTTP
+//! `holocron-grpc` - a gRPC surface over the holocron engine, alongside the HTTP
 //! `holocron-server`. `GenerateSql` is the drop-in the DairyBook Go API calls in
 //! place of the Python Vanna sidecar.
 

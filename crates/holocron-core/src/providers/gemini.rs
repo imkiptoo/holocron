@@ -603,7 +603,7 @@ mod tests {
     #[tokio::test]
     async fn retries_then_succeeds_on_transient_429() {
         let server = MockServer::start().await;
-        // First response 429, then 200 — with max_retries=2 the call should
+        // First response 429, then 200 - with max_retries=2 the call should
         // recover and return the eventual success.
         Mock::given(method("POST"))
             .respond_with(ResponseTemplate::new(429).set_body_json(json!({

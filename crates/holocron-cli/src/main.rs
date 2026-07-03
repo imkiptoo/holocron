@@ -1,4 +1,4 @@
-//! `holocron` — CLI for training the engine and asking natural-language questions.
+//! `holocron` - CLI for training the engine and asking natural-language questions.
 
 use std::io::Read;
 

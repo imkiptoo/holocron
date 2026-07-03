@@ -1,4 +1,4 @@
-//! `holocron-server` — a small HTTP API over the engine, mirroring Vanna's Flask
+//! `holocron-server` - a small HTTP API over the engine, mirroring Vanna's Flask
 //! endpoints (ask / generate_sql / run_sql / train / training_data).
 
 use std::time::Duration;

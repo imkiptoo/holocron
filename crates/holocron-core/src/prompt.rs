@@ -1,4 +1,4 @@
-//! Prompt assembly and SQL extraction — the RAG glue.
+//! Prompt assembly and SQL extraction - the RAG glue.
 //!
 //! Ports Vanna's `get_sql_prompt` (system prompt from retrieved DDL + docs +
 //! few-shot question/SQL pairs) and `extract_sql` (pull SQL back out of the
@@ -42,9 +42,9 @@ fn append_examples_and_question(
 
 /// Build the message list sent to the LLM for a text-to-SQL request.
 ///
-/// * `ddls` — retrieved schema snippets (most relevant first).
-/// * `docs` — retrieved documentation snippets.
-/// * `examples` — retrieved `(question, sql)` few-shot pairs.
+/// * `ddls` - retrieved schema snippets (most relevant first).
+/// * `docs` - retrieved documentation snippets.
+/// * `examples` - retrieved `(question, sql)` few-shot pairs.
 pub fn build_sql_prompt(
     question: &str,
     ddls: &[String],
@@ -70,7 +70,7 @@ pub fn build_sql_prompt(
 }
 
 /// Like [`build_sql_prompt`], but asks the model to return the SQL *and* three
-/// follow-up questions in one structured JSON reply — folding what used to be a
+/// follow-up questions in one structured JSON reply - folding what used to be a
 /// second LLM round-trip into the generation call.
 pub fn build_combined_prompt(
     question: &str,
@@ -125,7 +125,7 @@ pub fn extract_combined(reply: &str) -> (Option<String>, Vec<String>) {
     (extract_sql(reply), Vec::new())
 }
 
-/// Max result rows sent to the answer model — keeps the prompt within token
+/// Max result rows sent to the answer model - keeps the prompt within token
 /// limits; the true row count is stated so aggregates stay honest.
 const ANSWER_ROW_LIMIT: usize = 50;
 
@@ -143,7 +143,7 @@ pub fn build_answer_prompt(question: &str, result: &crate::types::QueryResult) -
     let mut sys = String::from(
         "You are a data analyst. Given a user's question and the result of a SQL \
          query over their database (columns + rows as JSON), write a direct answer \
-         to the question. Ground every figure in the provided rows — never invent \
+         to the question. Ground every figure in the provided rows - never invent \
          numbers. If the user asked for the data in a specific format (CSV, JSON, a \
          list, a table), return exactly that. Otherwise reply in concise prose: state \
          the key findings, and if they asked for advice or what to do, add one to \

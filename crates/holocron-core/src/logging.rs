@@ -1,4 +1,4 @@
-//! Central logging setup — the holocron analogue of the DairyBook `./api`
+//! Central logging setup - the holocron analogue of the DairyBook `./api`
 //! `pkg/logger` + `clog`.
 //!
 //! It mirrors that style: a single entry point configured once at startup, a
@@ -76,7 +76,7 @@ pub fn init(level: &str, format: Format) {
 }
 
 /// A process-root span that stamps `service = <name>` (e.g. `"holocron-server"`)
-/// onto every event emitted while it is entered — the analogue of the Go
+/// onto every event emitted while it is entered - the analogue of the Go
 /// logger's `.Str("service", ...)`. Enter it for the process lifetime, or
 /// `.instrument()` the main future with it in async binaries.
 pub fn service_span(service: &'static str) -> Span {
@@ -98,7 +98,7 @@ pub fn elapsed_ms(start: Instant) -> f64 {
 }
 
 /// A drop guard that logs, at **info**, how long a request took from
-/// construction to drop — "from the moment it came in to the moment we
+/// construction to drop - "from the moment it came in to the moment we
 /// processed it". Because it logs on `Drop`, it also fires on early returns and
 /// errors. Put one at each request boundary (gRPC RPC / HTTP handler).
 ///

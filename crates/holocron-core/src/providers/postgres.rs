@@ -178,21 +178,21 @@ fn cell_to_value(row: &PgRow, i: usize, kind: ColKind) -> Value {
 impl SqlRunner for PgSqlRunner {
     async fn run_sql(&self, sql: &str) -> Result<QueryResult> {
         // Execute inside a transaction so we can enforce, at the database level:
-        //  - `READ ONLY` — Postgres itself rejects any write (defeats writable
+        //  - `READ ONLY` - Postgres itself rejects any write (defeats writable
         //    CTEs / side-effecting functions even if the AST gate is bypassed);
-        //  - `SET LOCAL statement_timeout` — caps runaway/expensive queries.
+        //  - `SET LOCAL statement_timeout` - caps runaway/expensive queries.
         let mut tx = self.pool.begin().await?;
         if self.read_only {
             sqlx::query("SET TRANSACTION READ ONLY").execute(&mut *tx).await?;
         }
         if self.statement_timeout_ms > 0 {
-            // Integer milliseconds — safe to interpolate.
+            // Integer milliseconds - safe to interpolate.
             let set = format!("SET LOCAL statement_timeout = {}", self.statement_timeout_ms);
             sqlx::query(&set).execute(&mut *tx).await?;
         }
 
         // Stream rows rather than buffering the whole result, so a huge result
-        // set can't blow memory — and stop early once the row cap is hit.
+        // set can't blow memory - and stop early once the row cap is hit.
         // Column names + per-column decoders are resolved once from the first
         // row instead of re-inspecting the type of every cell.
         let mut columns: Vec<String> = Vec::new();

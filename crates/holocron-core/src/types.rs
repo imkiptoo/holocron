@@ -89,7 +89,7 @@ pub struct AskResult {
     pub result: Option<QueryResult>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
-    /// The model's answer synthesized from `result` — prose insight by default,
+    /// The model's answer synthesized from `result` - prose insight by default,
     /// but the phrasing is prompt-driven, so it can equally be the rows rendered
     /// as CSV/JSON/etc. Present only when an answer was requested and the query
     /// ran successfully.

@@ -508,7 +508,7 @@ async fn ask_generates_sql_and_followups_in_one_call() {
             "Top 5 only?".to_string(),
         ]
     );
-    // Exactly one LLM call — followups were folded in, not a second round-trip.
+    // Exactly one LLM call - followups were folded in, not a second round-trip.
     assert_eq!(r.llm.seen.lock().unwrap().len(), 1);
 }
 
@@ -569,7 +569,7 @@ async fn remove_training_reports_hit_and_miss() {
 #[tokio::test]
 async fn ask_cache_hit_skips_generation_and_embedding() {
     // The store reports cached SQL for the question, so neither the LLM nor the
-    // embedder is called — a verbatim hit short-circuits before embedding.
+    // embedder is called - a verbatim hit short-circuits before embedding.
     let store = FakeStore { cache_hit: Some("SELECT cached".into()), ..Default::default() };
     let r = rig_cached(ScriptedLlm::default(), store);
     let res = r.engine.ask("how many?", false, false, false).await.unwrap();

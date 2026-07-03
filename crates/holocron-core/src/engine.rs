@@ -1,4 +1,4 @@
-//! The engine — the Rust analogue of Vanna's `VannaBase`.
+//! The engine - the Rust analogue of Vanna's `VannaBase`.
 //!
 //! It wires an [`Llm`], [`Embedder`], [`VectorStore`], and [`SqlRunner`]
 //! together and exposes the high-level `train` / `generate_sql` / `ask` flow.
@@ -16,7 +16,7 @@ use crate::traits::{ChatStream, Embedder, Llm, SqlRunner, VectorStore};
 use crate::types::{AskResult, Message, QueryResult, TrainingItem, TrainingRow};
 
 /// Normalize a question into the verbatim-cache key: trimmed, lower-cased, with
-/// internal whitespace collapsed. This is deliberately conservative — only
+/// internal whitespace collapsed. This is deliberately conservative - only
 /// truly identical questions (modulo casing/spacing) share a cache entry, so
 /// "top 10 …" and "bottom 10 …" never collide.
 pub fn normalize_question(question: &str) -> String {
@@ -78,7 +78,7 @@ impl Engine {
                         self.generate_question(&sql).await?
                     }
                 };
-                // Embed on the question — that's what future questions match against.
+                // Embed on the question - that's what future questions match against.
                 let emb = self.embedder.embed(&question).await?;
                 let id = self.store.add_question_sql(&question, &sql, emb).await?;
                 info!(%id, "trained question/SQL pair");
@@ -124,7 +124,7 @@ impl Engine {
         let messages = vec![
             Message::system(
                 "You write a single, concise natural-language question that the \
-                 given SQL query answers. Reply with the question only — no quotes, \
+                 given SQL query answers. Reply with the question only - no quotes, \
                  no preamble.",
             ),
             Message::user(sql.to_string()),
@@ -175,7 +175,7 @@ impl Engine {
     }
 
     /// Stream the raw model completion for a text-to-SQL request (no cache, no
-    /// extraction — the caller sees the tokens as they arrive).
+    /// extraction - the caller sees the tokens as they arrive).
     #[instrument(skip_all, fields(q = %question))]
     pub async fn generate_sql_stream(&self, question: &str) -> Result<ChatStream> {
         let q_emb = self.embed_timed(question).await?;
@@ -231,7 +231,7 @@ impl Engine {
         if self.config.cache_enabled {
             match self.store.cache_lookup(&key, self.config.cache_ttl_secs).await {
                 Ok(Some(sql)) => {
-                    info!("cache hit (verbatim) — skipping generation");
+                    info!("cache hit (verbatim) - skipping generation");
                     return Ok((sql, Vec::new(), true));
                 }
                 Ok(None) => debug!("cache miss; generating"),
@@ -284,7 +284,7 @@ impl Engine {
     // ---- Execution ------------------------------------------------------
 
     /// Run SQL against the warehouse. Generated SQL is untrusted, so it passes
-    /// the AST validation gate (`sql_guard`) first — a single read-only SELECT
+    /// the AST validation gate (`sql_guard`) first - a single read-only SELECT
     /// touching only permitted objects. (The runner additionally executes inside
     /// a `READ ONLY` transaction with a `statement_timeout` as defense in depth.)
     #[instrument(skip_all)]
@@ -343,7 +343,7 @@ impl Engine {
             (None, None)
         };
 
-        // Answer over the rows (best-effort — a failed answer doesn't fail ask).
+        // Answer over the rows (best-effort - a failed answer doesn't fail ask).
         let answer = match (answer, &result) {
             (true, Some(qr)) => match self.answer(question, qr).await {
                 Ok(a) => Some(a),

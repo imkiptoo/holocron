@@ -53,7 +53,7 @@ impl PgVectorStore {
         sqlx::query(&create).execute(&self.pool).await?;
 
         // Verbatim SQL cache: previously answered questions keyed by the exact
-        // normalized question text (NOT by embedding similarity — see the
+        // normalized question text (NOT by embedding similarity - see the
         // `VectorStore` cache docs). One row per question (upsert on `question`).
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS query_cache (
@@ -89,7 +89,7 @@ impl PgVectorStore {
         .await?;
 
         // Retrieval is always scoped to one kind, but a single HNSW index over
-        // the whole table applies the `kind` filter only *after* the ANN walk —
+        // the whole table applies the `kind` filter only *after* the ANN walk -
         // hurting recall and latency when neighbours are the wrong kind. Instead
         // build one partial index per kind so each search traverses only its own
         // rows. (The query interpolates the kind as a literal so the planner can
@@ -134,7 +134,7 @@ impl PgVectorStore {
 
     async fn nearest(&self, kind: &str, embedding: &[f32], k: usize) -> Result<Vec<sqlx::postgres::PgRow>> {
         // `kind` is interpolated as a literal (not bound) so the planner can
-        // match the per-kind partial HNSW index — a bound `$1` leaves `kind`
+        // match the per-kind partial HNSW index - a bound `$1` leaves `kind`
         // unknown at plan time and the partial index would be skipped. Safe
         // because every caller passes a fixed `TrainingKind::as_str()` value.
         debug_assert!(matches!(kind, "ddl" | "documentation" | "sql"));

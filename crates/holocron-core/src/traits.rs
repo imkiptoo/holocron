@@ -43,7 +43,7 @@ pub trait Embedder: Send + Sync {
         Ok(out)
     }
 
-    /// Vector dimensionality — must match the pgvector column width.
+    /// Vector dimensionality - must match the pgvector column width.
     fn dims(&self) -> usize;
 }
 

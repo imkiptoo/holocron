@@ -3,7 +3,7 @@
 //! [`CachingEmbedder`] wraps any [`Embedder`] and memoizes exact-match
 //! `text -> embedding` results, so repeated questions (and repeated training
 //! text) skip the network round-trip. This is distinct from the engine's
-//! *semantic* SQL cache — it only avoids re-embedding byte-identical input.
+//! *semantic* SQL cache - it only avoids re-embedding byte-identical input.
 
 use std::collections::HashMap;
 use std::sync::Mutex;

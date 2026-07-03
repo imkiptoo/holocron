@@ -1,6 +1,6 @@
 # holocron
 
-A **text-to-SQL RAG engine** in Rust — a Vanna-style system that turns natural-language
+A **text-to-SQL RAG engine** in Rust - a Vanna-style system that turns natural-language
 questions into SQL over your PostgreSQL database, using **Google Gemini** for the LLM and
 embeddings and **pgvector** for retrieval.
 
@@ -15,7 +15,7 @@ a few-shot prompt, asks Gemini to write SQL, runs it, and returns the rows.
 | `crates/holocron-core` | The engine: `Llm` / `Embedder` / `VectorStore` / `SqlRunner` traits, the `Engine`, RAG prompt assembly, and Gemini + pgvector + Postgres providers. |
 | `crates/holocron-cli` | `holocron` command-line tool. |
 | `crates/holocron-server` | `holocron-server` HTTP API (axum). |
-| `crates/holocron-grpc` | `holocron-grpc` gRPC API (tonic) — same operations as the HTTP server; the DairyBook Go API calls `GenerateSql` here in place of the Python Vanna sidecar. |
+| `crates/holocron-grpc` | `holocron-grpc` gRPC API (tonic) - same operations as the HTTP server; the DairyBook Go API calls `GenerateSql` here in place of the Python Vanna sidecar. |
 
 ## Setup
 
@@ -39,19 +39,19 @@ a few-shot prompt, asks Gemini to write SQL, runs it, and returns the rows.
    engine loads `./holocron.toml`, overridable with the `HOLOCRON_CONFIG` env var. Keys:
 
    - `[gemini] chat_model` (default `gemini-2.5-flash`), `embed_model`
-     (`gemini-embedding-001`), `embed_dims` (768 — must match the pgvector column),
-     `max_concurrency` (8) + `max_retries` (3) — outbound rate-limit governor.
-   - `[database] url` — the warehouse queried by generated SQL;
-     `vector_url` — where embeddings live (defaults to `url`); `max_connections`
-     (10), `acquire_timeout_secs` (30) — pool sizing.
-   - `[retrieval] top_k_ddl/top_k_docs/top_k_sql` — retrieval depth.
-   - `[safety]` — the SQL guardrails: `validate_sql` (on) runs the AST gate,
+     (`gemini-embedding-001`), `embed_dims` (768 - must match the pgvector column),
+     `max_concurrency` (8) + `max_retries` (3) - outbound rate-limit governor.
+   - `[database] url` - the warehouse queried by generated SQL;
+     `vector_url` - where embeddings live (defaults to `url`); `max_connections`
+     (10), `acquire_timeout_secs` (30) - pool sizing.
+   - `[retrieval] top_k_ddl/top_k_docs/top_k_sql` - retrieval depth.
+   - `[safety]` - the SQL guardrails: `validate_sql` (on) runs the AST gate,
      `allow_system_schemas` (off) blocks `information_schema`/`pg_catalog`,
      `statement_timeout_secs` (30) caps each query, `max_rows` (10000) caps rows,
      `read_only` (true) is the legacy fallback check. See **Security** below.
-   - `[cache] enabled/ttl_secs` — the verbatim (exact-match) SQL cache.
+   - `[cache] enabled/ttl_secs` - the verbatim (exact-match) SQL cache.
    - `[server] bind_addr` (default `127.0.0.1:8080`), `request_timeout_secs` (120),
-     `max_concurrent_requests` (64 — load-shed beyond this).
+     `max_concurrent_requests` (64 - load-shed beyond this).
    - `[logging] level` (`debug|info|warn|error`, default `info`; overridable via
      `HOLOCRON_LOG`/`RUST_LOG`) + `format` (`console` for dev, `json` for prod).
      At `info`, each request logs its total time (`… processed elapsed_ms=…`);
@@ -134,20 +134,20 @@ The suite has three layers:
   assembly / SQL extraction / combined-reply parsing / read-only detection, the
   type serde contracts, error formatting, the CLI/server helpers (including the
   load-shed/timeout error mapping), the embedding cache, and the Gemini provider
-  — request mapping, response/error parsing, **batch embedding**, **SSE
+  - request mapping, response/error parsing, **batch embedding**, **SSE
   streaming**, and **429 retry** are all tested against a
   [`wiremock`](https://docs.rs/wiremock) mock HTTP server, so no real API key or
   network is needed.
 - **Engine tests** (`crates/holocron-core/tests/engine.rs`): the full
   `train` / `generate_sql` / `run_sql` / `ask` flow driven against in-memory
-  fake providers — no Gemini or Postgres. These assert the wiring: which text
+  fake providers - no Gemini or Postgres. These assert the wiring: which text
   gets embedded, that the configured top-k reaches the store, read-only mode
   blocks writes before they hit the runner, execution errors are captured (not
   raised), followups fold into one call, and the **verbatim cache** hits/misses
   /stores and is invalidated on DDL training.
 - **Postgres integration tests** (`crates/holocron-core/tests/pg.rs`): the pgvector
   store round-trip, single-round-trip `get_context`, the verbatim cache
-  (lookup/TTL/clear), the SQL runner's type mapping / row cap / introspection —
+  (lookup/TTL/clear), the SQL runner's type mapping / row cap / introspection -
   against a real database. Gated on `HOLOCRON_TEST_DATABASE_URL`, they skip when it
   is unset (so the default run stays hermetic) and serialize via a shared lock
   since they share one database.
@@ -181,13 +181,13 @@ retrieval/execution), so the design attacks those first:
 
 - **Verbatim SQL cache.** Before generating, `ask`/`generate_sql` check
   `query_cache` for the **exact** normalized question (`Engine::normalize_question`
-  — trimmed, lower-cased, whitespace-collapsed), honouring `ttl_secs`. A hit
+  - trimmed, lower-cased, whitespace-collapsed), honouring `ttl_secs`. A hit
   returns the cached SQL and **skips embedding *and* generation** (~2 s → one
   indexed lookup). Matching is exact, *not* by embedding similarity: "top 10 …"
   and "bottom 10 …" are near-identical vectors but need opposite SQL, so a
   similarity cache would answer one with the other's query. Cleared
   automatically when DDL is trained (schema change ⇒ cached SQL may be stale).
-  Semantically-similar past questions still help — as few-shot examples in the
+  Semantically-similar past questions still help - as few-shot examples in the
   prompt (`get_similar_question_sql`), where the LLM regenerates, like Vanna.
 - **Streaming generation.** `Llm::chat_stream` + `Engine::generate_sql_stream`
   use Gemini's `streamGenerateContent?alt=sse` and surface tokens through the
@@ -197,11 +197,11 @@ retrieval/execution), so the design attacks those first:
   serial LLM round-trip (`prompt::build_combined_prompt` / `extract_combined`).
 - **Single-round-trip retrieval.** `VectorStore::get_context` fetches all three
   buckets in one `UNION ALL` query (one connection), each branch still using its
-  per-kind partial HNSW index — instead of three separate queries.
+  per-kind partial HNSW index - instead of three separate queries.
 - **Per-kind partial HNSW indexes.** `init_db` builds one partial index per kind
   (`... USING hnsw (embedding vector_cosine_ops) WHERE kind = '...'`); retrieval
   interpolates the kind as a **literal** (not a bound `$1`) so the planner can
-  match those predicates — a single whole-table index would apply the `kind`
+  match those predicates - a single whole-table index would apply the `kind`
   filter only after the ANN walk, hurting recall and latency.
 - **Outbound rate-limit governor + retries.** A shared `Semaphore`
   (`gemini.max_concurrency`) caps concurrent Gemini calls so a request burst
@@ -220,32 +220,32 @@ retrieval/execution), so the design attacks those first:
 
 ## Security
 
-**The LLM is an untrusted SQL generator** — its input is untrusted natural
+**The LLM is an untrusted SQL generator** - its input is untrusted natural
 language (potentially prompt-injected), so its output is never trusted. Defense
 in depth, strongest first:
 
 1. **Least-privilege DB role (the real boundary).** Point `[database].url` at a
-   read-only role granted `SELECT` on only your analytics schemas — then no
+   read-only role granted `SELECT` on only your analytics schemas - then no
    generated query can read data it wasn't granted, regardless of the SQL. See
    [`demo/readonly_role.sql`](demo/readonly_role.sql). **Never** run against a
-   superuser (the demo's `postgres`) with untrusted input — a `SELECT
+   superuser (the demo's `postgres`) with untrusted input - a `SELECT
    pg_read_file(…)` could read server files.
 2. **AST validation gate** ([`sql_guard`](crates/holocron-core/src/sql_guard.rs)):
-   every query is parsed and must be a single read-only `SELECT` — no writes/DDL
+   every query is parsed and must be a single read-only `SELECT` - no writes/DDL
    *anywhere* (incl. writable CTEs like `WITH … DELETE`), no `information_schema`
    /`pg_catalog`/`pg_*` refs, no file/dblink/backend functions. Fails closed.
    Replaces the first-token `is_read_only` check, which passed those.
 3. **Hardened execution.** Each query runs in a `BEGIN READ ONLY` transaction
    with `SET LOCAL statement_timeout` and a row cap.
 
-The **answer/summarizer step still sees the result rows** — sending them to
+The **answer/summarizer step still sees the result rows** - sending them to
 hosted Gemini is a cross-border transfer; self-host or mask for sensitive data.
-And the HTTP/gRPC servers have **no auth yet** — add authN/Z, rate limits, and
+And the HTTP/gRPC servers have **no auth yet** - add authN/Z, rate limits, and
 audit before exposing them, and scope the cache per tenant.
 
 When holocron is the DairyBook API's *generator*, all of this is moot there: the
 API sends schema only (never data) and re-validates + executes the SQL itself
-under its own `dairybook_ai` role — see `../api/pkg/ai`.
+under its own `dairybook_ai` role - see `../api/pkg/ai`.
 
 ## Notes
 
@@ -254,5 +254,5 @@ under its own `dairybook_ai` role — see `../api/pkg/ai`.
 - On `sqlx 0.8`: the `pgvector` crate (our vector-store binding) has no `sqlx 0.9`
   support yet, and sqlx 0.9 also adds an anti-injection guard that would require
   reworking every dynamic query. Everything else is on the latest release.
-- No server auth yet — it's a localhost dev tool. Add a bearer-token middleware layer
+- No server auth yet - it's a localhost dev tool. Add a bearer-token middleware layer
   in `holocron-server` before exposing it.

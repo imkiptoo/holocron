@@ -1,8 +1,8 @@
-//! `holocron-core` — a text-to-SQL RAG engine (Vanna-style) built on Google
+//! `holocron-core` - a text-to-SQL RAG engine (Vanna-style) built on Google
 //! Gemini and PostgreSQL/pgvector.
 //!
-//! The [`Engine`] ties four abstractions together — an [`Llm`], an
-//! [`Embedder`], a [`VectorStore`], and a [`SqlRunner`] — and exposes the
+//! The [`Engine`] ties four abstractions together - an [`Llm`], an
+//! [`Embedder`], a [`VectorStore`], and a [`SqlRunner`] - and exposes the
 //! `train` / `generate_sql` / `ask` flow. See [`traits`] for the abstractions
 //! and [`providers`] for the Gemini + Postgres implementations.
 

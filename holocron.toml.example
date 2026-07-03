@@ -27,7 +27,7 @@ top_k_sql  = 5
 # a single read-only SELECT, no writes/DDL (incl. writable CTEs), no system
 # schemas, no file/dblink/server-control functions. Queries also execute inside
 # a READ ONLY transaction with a statement_timeout. The real boundary, though,
-# is a least-privilege DB role — see demo/readonly_role.sql.
+# is a least-privilege DB role - see demo/readonly_role.sql.
 read_only            = true
 validate_sql         = true           # AST validation gate (recommended on)
 allow_system_schemas = false          # allow information_schema / pg_catalog refs
@@ -36,7 +36,7 @@ max_rows             = 10000          # cap rows returned by run_sql (0 = unlimi
 
 [cache]
 # Verbatim SQL cache: reuse a past query's SQL only when the exact question
-# repeats (normalized case/spacing) — matching is exact, not by similarity, so
+# repeats (normalized case/spacing) - matching is exact, not by similarity, so
 # "top 10 …" and "bottom 10 …" never collide. Cleared when DDL is trained.
 enabled = true
 ttl_secs = 3600                       # cache entry lifetime (0 = no expiry)

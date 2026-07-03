@@ -1,14 +1,14 @@
-//! Deterministic SQL validation gate — the security boundary in front of query
+//! Deterministic SQL validation gate - the security boundary in front of query
 //! execution.
 //!
 //! The LLM is an **untrusted** SQL generator (its input is untrusted natural
 //! language, potentially prompt-injected), so its output is parsed and checked
-//! against an allow/deny policy *before* it ever reaches the database — never
+//! against an allow/deny policy *before* it ever reaches the database - never
 //! trusting the model's own "I won't do that". This replaces the old first-token
 //! `is_read_only` check, which passed writable CTEs (`WITH … DELETE`) and
 //! file-reading functions (`SELECT pg_read_file(…)`).
 //!
-//! This is defense-in-depth, **not** the primary boundary — a least-privilege,
+//! This is defense-in-depth, **not** the primary boundary - a least-privilege,
 //! read-only DB role granted `SELECT` on only the analytics schemas is. The gate
 //! adds a deterministic layer and good error messages on top of that role.
 
@@ -28,7 +28,7 @@ pub struct SqlPolicy {
 }
 
 /// Postgres functions that can read files, reach other systems, or control the
-/// server — never appropriate in a generated analytics query.
+/// server - never appropriate in a generated analytics query.
 const DENIED_FUNCTIONS: &[&str] = &[
     "pg_read_file",
     "pg_read_binary_file",
@@ -56,7 +56,7 @@ pub fn validate(sql: &str, policy: &SqlPolicy) -> Result<(), String> {
     let statements = Parser::parse_sql(&PostgreSqlDialect {}, sql)
         .map_err(|e| format!("could not parse SQL: {e}"))?;
 
-    // Exactly one statement — no stacked `SELECT …; DROP …`.
+    // Exactly one statement - no stacked `SELECT …; DROP …`.
     match statements.len() {
         1 => {}
         0 => return Err("no statement found".into()),
@@ -66,7 +66,7 @@ pub fn validate(sql: &str, policy: &SqlPolicy) -> Result<(), String> {
         return Err("only a single read-only SELECT query is allowed".into());
     }
 
-    // No write/DDL statement *anywhere* — this catches writable CTEs, whose
+    // No write/DDL statement *anywhere* - this catches writable CTEs, whose
     // INSERT/UPDATE/DELETE body is a nested statement in the AST.
     if let ControlFlow::Break(reason) = visit_statements(&statements, |s| match s {
         Statement::Query(_) => ControlFlow::Continue(()),
@@ -81,7 +81,7 @@ pub fn validate(sql: &str, policy: &SqlPolicy) -> Result<(), String> {
     // No references to system catalogs unless explicitly allowed. Reject both
     // qualified system schemas (`information_schema.columns`, `pg_catalog.*`) and
     // unqualified system relations reachable via `search_path` (`pg_stat_activity`,
-    // `pg_tables`, …) — Postgres reserves the `pg_` prefix for system objects.
+    // `pg_tables`, …) - Postgres reserves the `pg_` prefix for system objects.
     if !policy.allow_system_schemas {
         if let ControlFlow::Break(reason) = visit_relations(&statements, |name| {
             let full = name.to_string();
@@ -150,7 +150,7 @@ mod tests {
     fn allows_plain_selects() {
         ok("SELECT 1");
         ok("SELECT count(*) FROM sales.orders WHERE total > 10");
-        // Window functions, joins, group by, order by, limit — real generated SQL.
+        // Window functions, joins, group by, order by, limit - real generated SQL.
         ok("SELECT p.name, SUM(oi.quantity * oi.unit_price) AS rev, \
             PERCENT_RANK() OVER (ORDER BY SUM(oi.quantity * oi.unit_price) DESC) \
             FROM sales.products p JOIN sales.order_items oi ON p.product_id = oi.product_id \
@@ -173,7 +173,7 @@ mod tests {
 
     #[test]
     fn rejects_writable_cte() {
-        // First token is `with` — the old check passed this.
+        // First token is `with` - the old check passed this.
         rejected("WITH x AS (DELETE FROM t RETURNING *) SELECT * FROM x");
         rejected("WITH x AS (INSERT INTO t VALUES (1) RETURNING *) SELECT * FROM x");
     }

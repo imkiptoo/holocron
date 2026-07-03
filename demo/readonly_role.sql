@@ -1,4 +1,4 @@
--- A least-privilege, read-only role for holocron — the REAL security boundary.
+-- A least-privilege, read-only role for holocron - the REAL security boundary.
 --
 -- The AST validation gate (sql_guard) and the READ ONLY transaction are
 -- defense-in-depth, but the LLM is untrusted: only the database can guarantee
@@ -29,7 +29,7 @@ REVOKE ALL ON SCHEMA public FROM holocron_ro;
 
 -- 4) SELECT-only, and ONLY on the curated analytics schemas. Everything the
 --    role wasn't explicitly granted (other schemas, catalogs' underlying data,
---    a future `users.password_hash`) is unreadable — regardless of the SQL.
+--    a future `users.password_hash`) is unreadable - regardless of the SQL.
 GRANT USAGE ON SCHEMA sales, inventory, finance TO holocron_ro;
 GRANT SELECT ON ALL TABLES IN SCHEMA sales, inventory, finance TO holocron_ro;
 -- Cover tables created later, too.
